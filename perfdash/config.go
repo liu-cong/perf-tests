@@ -36,7 +36,7 @@ import (
 type TestDescription struct {
 	Name             string
 	OutputFilePrefix string
-	Parser           func(data []byte, buildNumber int, testResult *BuildData)
+	Parser           func(data []byte, buildNumber string, testResult *BuildData)
 }
 
 // TestDescriptions is a map job->component->description.

@@ -108,7 +108,7 @@ func (g *GoogleGCSDownloader) getJobData(wg *sync.WaitGroup, result JobToCategor
 	}
 	fmt.Printf("Builds to fetch for %v: %v\n", job, buildsToFetch)
 
-	sort.Sort(sort.Reverse(sort.IntSlice(buildNumbers)))
+	sort.Sort(sort.Reverse(sort.StringSlice(buildNumbers)))
 	for index := 0; index < buildsToFetch && index < len(buildNumbers); index++ {
 		buildNumber := buildNumbers[index]
 		fmt.Printf("Fetching %s build %v...\n", job, buildNumber)
@@ -190,8 +190,8 @@ func newBucketUtil(bucket, path, credentialPath string) (*bucketUtil, error) {
 	}, nil
 }
 
-func (b *bucketUtil) getBuildNumbersFromJenkinsGoogleBucket(job string) ([]int, error) {
-	var builds []int
+func (b *bucketUtil) getBuildNumbersFromJenkinsGoogleBucket(job string) ([]string, error) {
+	var builds []string
 	ctx := context.Background()
 	jobPrefix := joinStringsAndInts(b.logPath, job) + "/"
 	fmt.Printf("%s\n", jobPrefix)
@@ -212,16 +212,12 @@ func (b *bucketUtil) getBuildNumbersFromJenkinsGoogleBucket(job string) ([]int, 
 		}
 		build := strings.TrimPrefix(attrs.Prefix, jobPrefix)
 		build = strings.TrimSuffix(build, "/")
-		buildNo, err := strconv.Atoi(build)
-		if err != nil {
-			return nil, fmt.Errorf("unknown build name convention: %s", build)
-		}
-		builds = append(builds, buildNo)
+		builds = append(builds, build)
 	}
 	return builds, nil
 }
 
-func (b *bucketUtil) listFilesInBuild(job string, buildNumber int, prefix string) ([]string, error) {
+func (b *bucketUtil) listFilesInBuild(job string, buildNumber string, prefix string) ([]string, error) {
 	var files []string
 	ctx := context.Background()
 	jobPrefix := joinStringsAndInts(b.logPath, job, buildNumber, prefix)
@@ -242,7 +238,7 @@ func (b *bucketUtil) listFilesInBuild(job string, buildNumber int, prefix string
 	return files, nil
 }
 
-func (b *bucketUtil) getFileFromJenkinsGoogleBucket(job string, buildNumber int, path string) ([]byte, error) {
+func (b *bucketUtil) getFileFromJenkinsGoogleBucket(job string, buildNumber string, path string) ([]byte, error) {
 	ctx := context.Background()
 	filePath := joinStringsAndInts(b.logPath, job, buildNumber, path)
 	rc, err := b.bucket.Object(filePath).NewReader(ctx)

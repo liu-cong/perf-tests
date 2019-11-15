@@ -27,13 +27,13 @@ func Test_parseSystemPodMetrics(t *testing.T) {
 	tests := []struct {
 		name        string
 		data        []byte
-		buildNumber int
+		build string
 		testResult  *BuildData
 		want        *BuildData
 	}{
 		{
 			name:        "same-container-in-two-pods",
-			buildNumber: 123,
+			build:       "123",
 			data:        sameContainerInTwoPodsSummary(),
 			testResult:  &BuildData{Job: "", Version: "", Builds: map[string][]perftype.DataItem{}},
 			want: &BuildData{Job: "", Version: "", Builds: map[string][]perftype.DataItem{
@@ -54,7 +54,7 @@ func Test_parseSystemPodMetrics(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			parseSystemPodMetrics(tt.data, tt.buildNumber, tt.testResult)
+			parseSystemPodMetrics(tt.data, tt.build, tt.testResult)
 			if !reflect.DeepEqual(*tt.testResult, *tt.want) {
 				t.Errorf("want %v, got %v", *tt.want, *tt.testResult)
 			}
